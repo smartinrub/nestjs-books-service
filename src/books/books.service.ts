@@ -37,7 +37,7 @@ export class BooksService {
             ...craeteBookDto,
             status: BookStatus.AVAILABLE
         }
-        this.bookRepository.insert({ ...newBook })
+        await this.bookRepository.insert({ ...newBook })
         return await this.bookRepository.findOneBy({ isbn: craeteBookDto.isbn })
     }
 
@@ -47,8 +47,8 @@ export class BooksService {
     }
 
     async delete(isbn: string): Promise<Book> {
-        const removedBook = this.findOne(isbn)
-        this.bookRepository.delete({ isbn: isbn })
+        const removedBook = await this.findOne(isbn)
+        await this.bookRepository.delete({ isbn: isbn })
         return removedBook
     }
 

@@ -2,13 +2,15 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
-import { randomUUID } from 'crypto';
+import { DataSource } from 'typeorm';
+import { Book } from './../src/books/entities/Book.entity';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
 
+  const isbn = "978-0-452-28423-4";
   const bookRequestBody = {
-    "isbn": randomUUID,
+    "isbn": isbn,
     "title": "1984",
     "author": "George Orwell"
   };
@@ -20,12 +22,13 @@ describe('AppController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
+    const dataSource = app.get(DataSource);
+    await dataSource.createQueryBuilder().delete().from(Book).execute();
   });
 
   afterEach(async () => {
     await app.close();
   });
-
 
   it('get book by isbn', () => {
     return request(app.getHttpServer())
@@ -33,18 +36,18 @@ describe('AppController (e2e)', () => {
       .send(bookRequestBody)
       .expect(201)
       .expect({
-        "isbn": "978-0-452-28423-4",
+        "isbn": isbn,
         "title": "1984",
         "author": "George Orwell",
         "status": "AVAILABLE"
       })
       .then(() => {
         return request(app.getHttpServer())
-          .get('/books/978-0-452-28423-4')
+          .get('/books/' + isbn)
           .expect(200)
           .expect(
             {
-              "isbn": "978-0-452-28423-4",
+              "isbn": isbn,
               "title": "1984",
               "author": "George Orwell",
               "status": "AVAILABLE"
@@ -55,7 +58,7 @@ describe('AppController (e2e)', () => {
 
   it('get book by isbn returns not found', () => {
     return request(app.getHttpServer())
-      .get('/books/978-0-452-28423-4')
+      .get('/books/' + isbn)
       .expect(404)
       .expect({ "message": "Book Not Found", "error": "Not Found", "statusCode": 404 })
   });
@@ -72,11 +75,11 @@ describe('AppController (e2e)', () => {
       .expect(201)
       .then(() => {
         return request(app.getHttpServer())
-          .get('/books/978-0-452-28423-4')
+          .get('/books/' + isbn)
           .expect(200)
           .expect(
             {
-              "isbn": "978-0-452-28423-4",
+              "isbn": isbn,
               "title": "1984",
               "author": "George Orwell",
               "status": "AVAILABLE"
@@ -84,12 +87,12 @@ describe('AppController (e2e)', () => {
           )
           .then(() => {
             return request(app.getHttpServer())
-              .patch('/books/978-0-452-28423-4')
+              .patch('/books/' + isbn)
               .send(updatedBookRequestBody)
               .expect(200)
               .expect(
                 {
-                  "isbn": "978-0-452-28423-4",
+                  "isbn": isbn,
                   "title": "Updated Title",
                   "author": "Updated Author",
                   "status": "AVAILABLE"
@@ -106,11 +109,11 @@ describe('AppController (e2e)', () => {
       .expect(201)
       .then(() => {
         return request(app.getHttpServer())
-          .get('/books/978-0-452-28423-4')
+          .get('/books/' + isbn)
           .expect(200)
           .expect(
             {
-              "isbn": "978-0-452-28423-4",
+              "isbn": isbn,
               "title": "1984",
               "author": "George Orwell",
               "status": "AVAILABLE"
@@ -118,11 +121,11 @@ describe('AppController (e2e)', () => {
           )
           .then(() => {
             return request(app.getHttpServer())
-              .delete('/books/978-0-452-28423-4')
+              .delete('/books/' + isbn)
               .expect(200)
               .expect(
                 {
-                  "isbn": "978-0-452-28423-4",
+                  "isbn": isbn,
                   "title": "1984",
                   "author": "George Orwell",
                   "status": "AVAILABLE"
@@ -130,7 +133,7 @@ describe('AppController (e2e)', () => {
               )
               .then(() => {
                 return request(app.getHttpServer())
-                  .get('/books/978-0-452-28423-4')
+                  .get('/books/' + isbn)
                   .expect(404)
                   .expect({ "message": "Book Not Found", "error": "Not Found", "statusCode": 404 })
               })
@@ -144,18 +147,18 @@ describe('AppController (e2e)', () => {
       .send(bookRequestBody)
       .expect(201)
       .expect({
-        "isbn": "978-0-452-28423-4",
+        "isbn": isbn,
         "title": "1984",
         "author": "George Orwell",
         "status": "AVAILABLE"
       })
       .then(() => {
         return request(app.getHttpServer())
-          .post('/books/978-0-452-28423-4/transaction?action=CHECKOUT')
+          .post('/books/' + isbn + '/transaction?action=CHECKOUT')
           .expect(201)
           .expect(
             {
-              "isbn": "978-0-452-28423-4",
+              "isbn": isbn,
               "title": "1984",
               "author": "George Orwell",
               "status": "BOOKED"

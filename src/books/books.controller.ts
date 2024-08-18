@@ -15,17 +15,17 @@ export class BooksController {
     async findAll(
         @Query(ValidationPipe) findAllBooksQueryDto?: FindAllBooksQueryDto
     ): Promise<Book[]> {
-        return this.booksService.findAll(findAllBooksQueryDto.status)
+        return await this.booksService.findAll(findAllBooksQueryDto.status)
     }
 
     @Get(':isbn')
     async findOne(@Param('isbn') isbn: string): Promise<Book> {
-        return this.booksService.findOne(isbn)
+        return await this.booksService.findOne(isbn)
     }
 
     @Post()
     async create(@Body(ValidationPipe) createBookDto: CreateBookDto): Promise<Book> {
-        return this.booksService.create(createBookDto)
+        return await this.booksService.create(createBookDto)
     }
 
     @Patch(':isbn')
@@ -33,13 +33,13 @@ export class BooksController {
         @Param('isbn') isbn: string,
         @Body(ValidationPipe) updateBookDto: UpdateBookDto
     ): Promise<Book> {
-        return this.booksService.update(isbn, updateBookDto)
+        return await this.booksService.update(isbn, updateBookDto)
     }
 
 
     @Delete(':isbn')
     async delete(@Param('isbn') isbn: string) {
-        return this.booksService.delete(isbn)
+        return await this.booksService.delete(isbn)
     }
 
     @Post(':isbn/transaction')
@@ -47,6 +47,6 @@ export class BooksController {
         @Param('isbn') isbn: string,
         @Query(ValidationPipe) transaction: ExecuteTransactionQueryDto
     ): Promise<Book> {
-        return this.booksService.checkout(isbn, transaction.action)
+        return await this.booksService.checkout(isbn, transaction.action)
     }
 }
