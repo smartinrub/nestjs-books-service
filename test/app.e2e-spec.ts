@@ -2,12 +2,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
+import { randomUUID } from 'crypto';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
 
   const bookRequestBody = {
-    "isbn": "978-0-452-28423-4",
+    "isbn": randomUUID,
     "title": "1984",
     "author": "George Orwell"
   };
@@ -20,6 +21,11 @@ describe('AppController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
   });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
 
   it('get book by isbn', () => {
     return request(app.getHttpServer())

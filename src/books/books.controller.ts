@@ -4,6 +4,7 @@ import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { FindAllBooksQueryDto } from './dto/find-all-books-query.dto';
 import { ExecuteTransactionQueryDto } from './dto/execute-transaction-query.dto';
+import { Book } from './entities/Book.entity';
 
 @Controller('books')
 export class BooksController {
@@ -11,33 +12,41 @@ export class BooksController {
     constructor(private readonly booksService: BooksService) { }
 
     @Get()
-    findAll(@Query(ValidationPipe) findAllBooksQueryDto?: FindAllBooksQueryDto) {
+    async findAll(
+        @Query(ValidationPipe) findAllBooksQueryDto?: FindAllBooksQueryDto
+    ): Promise<Book[]> {
         return this.booksService.findAll(findAllBooksQueryDto.status)
     }
 
     @Get(':isbn')
-    findOne(@Param('isbn') isbn: string) {
+    async findOne(@Param('isbn') isbn: string): Promise<Book> {
         return this.booksService.findOne(isbn)
     }
 
     @Post()
-    create(@Body(ValidationPipe) createBookDto: CreateBookDto) {
+    async create(@Body(ValidationPipe) createBookDto: CreateBookDto): Promise<Book> {
         return this.booksService.create(createBookDto)
     }
 
     @Patch(':isbn')
-    update(@Param('isbn') isbn: string, @Body(ValidationPipe) updateBookDto: UpdateBookDto) {
+    async update(
+        @Param('isbn') isbn: string,
+        @Body(ValidationPipe) updateBookDto: UpdateBookDto
+    ): Promise<Book> {
         return this.booksService.update(isbn, updateBookDto)
     }
 
 
     @Delete(':isbn')
-    delete(@Param('isbn') isbn: string) {
+    async delete(@Param('isbn') isbn: string) {
         return this.booksService.delete(isbn)
     }
 
     @Post(':isbn/transaction')
-    checkout(@Param('isbn') isbn: string, @Query(ValidationPipe) transaction: ExecuteTransactionQueryDto) {
+    async checkout(
+        @Param('isbn') isbn: string,
+        @Query(ValidationPipe) transaction: ExecuteTransactionQueryDto
+    ): Promise<Book> {
         return this.booksService.checkout(isbn, transaction.action)
     }
 }
