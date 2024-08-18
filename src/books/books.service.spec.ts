@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { BookStatus } from './enum/book-status';
 import { NotFoundException } from '@nestjs/common';
 import { UpdateBookDto } from './dto/update-book.dto';
+import { randomUUID } from 'crypto';
 
 describe('BooksService', () => {
   let service: BooksService;
@@ -102,16 +103,20 @@ describe('BooksService', () => {
   describe('create', () => {
     it('should create a new book', async () => {
       const createBookDto = {
-        isbn: '978-1-60309-511-2',
+        isbn: randomUUID(),
         title: 'New Book',
         author: 'New Author',
       };
       const newBook = { ...createBookDto, status: BookStatus.AVAILABLE };
-      mockBookRepository.insert.mockResolvedValue(undefined);
-      mockBookRepository.findOneBy.mockResolvedValue(newBook);
+      mockBookRepository.insert.mockResolvedValue(null);
+      mockBookRepository.findOneBy
+        .mockResolvedValueOnce(null)
+        .mockReturnValue(newBook);
 
       const result = await service.create(createBookDto);
       expect(result).toEqual(newBook);
+
+      mockBookRepository.findOneBy.mockResolvedValue(newBook);
       expect(mockBookRepository.insert).toHaveBeenCalledWith(newBook);
     });
   });
